@@ -1,0 +1,1904 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>斗罗大陆人生模拟器</title>
+<style>
+:root {
+  --bg: #0a0a0f;
+  --bg2: #111118;
+  --bg3: #1a1a26;
+  --card: #14141e;
+  --border: #252535;
+  --text: #c0c0cc;
+  --text2: #8888a0;
+  --gold: #c9a55c;
+  --gold2: #d4b87a;
+  --gold3: #8b6f3a;
+  --red: #b5302f;
+  --red2: #e04040;
+  --green: #3a8a5c;
+  --blue: #4a80b0;
+  --purple: #7b4fa0;
+  --white: #e8e0d0;
+  --ring-white: #e8e0d0;
+  --ring-yellow: #e8c840;
+  --ring-purple: #b040c0;
+  --ring-black: #404040;
+  --ring-red: #d03030;
+  --font: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", sans-serif;
+  --font-title: "SimSun", "KaiTi", "STKaiti", serif;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-image:
+    radial-gradient(ellipse at 50% 0%, rgba(201,165,92,0.06) 0%, transparent 70%),
+    radial-gradient(ellipse at 20% 100%, rgba(180,48,47,0.04) 0%, transparent 50%);
+}
+
+#app {
+  width: 100%;
+  max-width: 720px;
+  min-height: 100vh;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* ===== Title Screen ===== */
+.screen { display:none; flex-direction:column; flex:1; }
+.screen.active { display:flex; }
+
+#title-screen {
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  gap: 24px;
+  animation: fadeIn 1.5s ease;
+}
+
+@keyframes fadeIn { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+@keyframes pulse { 0%,100% { opacity:0.6; } 50% { opacity:1; } }
+@keyframes glow { 0%,100% { text-shadow:0 0 20px rgba(201,165,92,0.3); } 50% { text-shadow:0 0 40px rgba(201,165,92,0.6), 0 0 80px rgba(201,165,92,0.3); } }
+
+.title-emblem {
+  font-size: 64px;
+  margin-bottom: 8px;
+  animation: glow 3s ease-in-out infinite;
+}
+
+.title-main {
+  font-family: var(--font-title);
+  font-size: 36px;
+  color: var(--gold);
+  letter-spacing: 6px;
+  font-weight: bold;
+}
+
+.title-sub {
+  font-size: 14px;
+  color: var(--text2);
+  letter-spacing: 3px;
+  margin-top: -4px;
+}
+
+.title-quote {
+  font-size: 13px;
+  color: var(--text2);
+  font-style: italic;
+  max-width: 400px;
+  line-height: 1.8;
+  margin-top: 8px;
+}
+
+.btn {
+  background: transparent;
+  border: 1px solid var(--gold3);
+  color: var(--gold);
+  padding: 12px 36px;
+  font-size: 16px;
+  font-family: var(--font);
+  cursor: pointer;
+  letter-spacing: 2px;
+  transition: all 0.3s;
+  border-radius: 2px;
+}
+
+.btn:hover {
+  background: rgba(201,165,92,0.1);
+  border-color: var(--gold);
+  box-shadow: 0 0 20px rgba(201,165,92,0.15);
+}
+
+.btn.small { padding: 8px 18px; font-size: 13px; letter-spacing: 1px; }
+.btn.danger { border-color: var(--red); color: var(--red); }
+.btn.danger:hover { background: rgba(181,48,47,0.15); }
+
+.btn-row { display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin-top:8px; }
+
+/* ===== Creation Screens ===== */
+.creation-screen {
+  gap: 20px;
+  animation: fadeIn 0.5s ease;
+}
+
+.creation-title {
+  font-family: var(--font-title);
+  font-size: 22px;
+  color: var(--gold);
+  text-align: center;
+  letter-spacing: 4px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.creation-prompt {
+  font-size: 15px;
+  color: var(--text);
+  line-height: 1.8;
+}
+
+.creation-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.creation-option {
+  background: var(--card);
+  border: 1px solid var(--border);
+  padding: 14px 18px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border-radius: 2px;
+  color: var(--text);
+  font-size: 14px;
+  text-align: left;
+  font-family: var(--font);
+  line-height: 1.6;
+}
+
+.creation-option:hover {
+  border-color: var(--gold3);
+  background: #1a1a2a;
+}
+
+.creation-option strong {
+  color: var(--gold2);
+  display: block;
+  margin-bottom: 2px;
+}
+
+.creation-option .hint {
+  color: var(--text2);
+  font-size: 12px;
+}
+
+.creation-input {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.creation-input input, .creation-input select {
+  flex: 1;
+  min-width: 150px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 10px 14px;
+  font-size: 14px;
+  font-family: var(--font);
+  border-radius: 2px;
+}
+
+.creation-input input:focus, .creation-input select:focus {
+  outline: none;
+  border-color: var(--gold3);
+}
+
+.creation-input select option {
+  background: var(--bg3);
+  color: var(--text);
+}
+
+/* ===== Game Screen ===== */
+#game-screen { gap: 0; }
+
+.game-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.game-location {
+  font-size: 13px;
+  color: var(--text2);
+  letter-spacing: 1px;
+}
+
+.game-time {
+  font-size: 12px;
+  color: var(--text2);
+}
+
+.game-narrative {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 0;
+}
+
+.narrative-block {
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  line-height: 2;
+  font-size: 15px;
+  animation: fadeIn 0.4s ease;
+}
+
+.narrative-block .narration {
+  color: var(--text);
+}
+
+.narrative-block .system-msg {
+  color: var(--gold);
+  font-size: 13px;
+  margin: 6px 0;
+}
+
+.narrative-block .combat-msg {
+  color: var(--red2);
+  font-size: 14px;
+  margin: 4px 0;
+}
+
+.choices-area {
+  margin-top: 4px;
+}
+
+.choices-title {
+  font-size: 12px;
+  color: var(--text2);
+  letter-spacing: 2px;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+.choice-btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-family: var(--font);
+  transition: all 0.2s;
+  border-radius: 2px;
+  line-height: 1.7;
+}
+
+.choice-btn:hover {
+  border-color: var(--gold3);
+  background: #1c1c2c;
+  padding-left: 20px;
+}
+
+.choice-btn .choice-label {
+  color: var(--gold);
+  font-weight: bold;
+  margin-right: 8px;
+}
+
+/* Status Panel */
+.status-bar {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  padding: 16px;
+  margin-top: 16px;
+  border-radius: 2px;
+  font-size: 13px;
+  line-height: 2;
+}
+
+.status-bar .stat-section {
+  margin-bottom: 10px;
+}
+
+.status-bar .stat-section:last-child { margin-bottom: 0; }
+
+.status-bar .stat-title {
+  color: var(--gold);
+  font-size: 13px;
+  letter-spacing: 2px;
+  margin-bottom: 6px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(201,165,92,0.15);
+}
+
+.status-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.status-item {
+  color: var(--text2);
+}
+
+.status-item span {
+  color: var(--text);
+}
+
+.soul-ring {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 4px;
+}
+
+.soul-ring.white { background: var(--ring-white); box-shadow: 0 0 4px rgba(232,224,208,0.4); }
+.soul-ring.yellow { background: var(--ring-yellow); box-shadow: 0 0 4px rgba(232,200,64,0.4); }
+.soul-ring.purple { background: var(--ring-purple); box-shadow: 0 0 4px rgba(176,64,192,0.4); }
+.soul-ring.black { background: var(--ring-black); box-shadow: 0 0 4px rgba(100,100,100,0.4); }
+.soul-ring.red { background: var(--ring-red); box-shadow: 0 0 6px rgba(208,48,48,0.5); }
+
+.save-slots { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+.save-slot { font-size:12px; padding:6px 12px; cursor:pointer; background:var(--bg3); border:1px solid var(--border); color:var(--text2); border-radius:2px; }
+.save-slot:hover { border-color:var(--gold3); color:var(--gold); }
+
+/* Buttons row */
+.action-bar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+/* Confirm card */
+.confirm-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  padding: 16px;
+  margin-top: 12px;
+  border-radius: 2px;
+}
+
+.confirm-card h3 {
+  color: var(--gold);
+  font-size: 15px;
+  margin-bottom: 8px;
+  letter-spacing: 2px;
+}
+
+.confirm-card table {
+  width: 100%;
+  font-size: 13px;
+  line-height: 2;
+}
+
+.confirm-card td:first-child {
+  color: var(--text2);
+  width: 110px;
+}
+
+.confirm-card td:last-child {
+  color: var(--text);
+}
+
+/* Toast */
+.toast {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg3);
+  border: 1px solid var(--gold3);
+  color: var(--gold);
+  padding: 10px 24px;
+  font-size: 13px;
+  letter-spacing: 1px;
+  z-index: 100;
+  animation: fadeIn 0.3s ease;
+  pointer-events: none;
+}
+
+/* Responsive */
+@media (max-width: 500px) {
+  #app { padding:12px; }
+  .title-main { font-size:26px; letter-spacing:3px; }
+  .creation-title { font-size:18px; }
+  .status-row { flex-direction:column; gap:4px; }
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <!-- Title Screen -->
+  <div id="title-screen" class="screen active">
+    <div class="title-emblem">⚜️</div>
+    <div class="title-main">斗罗大陆</div>
+    <div class="title-sub">人 生 模 拟 器</div>
+    <div class="title-quote">
+      "实力为尊。但今天，你还不必向任何人证明什么。<br>
+      这片大陆在等你踩上去。"
+    </div>
+    <button class="btn" onclick="Game.startNew()" style="margin-top:16px;">开 始 新 游 戏</button>
+    <button class="btn" onclick="Game.showLoadScreen()" style="margin-top:4px;font-size:13px;">继 续 游 戏</button>
+    <div style="margin-top:32px;font-size:11px;color:var(--text2);letter-spacing:1px;">
+      基于《斗罗大陆》第一部世界观 · 高自由度文字RPG
+    </div>
+  </div>
+
+  <!-- Character Creation Screen -->
+  <div id="creation-screen" class="screen creation-screen">
+    <div class="creation-title" id="creation-title">角色创建</div>
+    <div id="creation-content"></div>
+  </div>
+
+  <!-- Game Screen -->
+  <div id="game-screen" class="screen">
+    <div class="game-header">
+      <span class="game-location" id="gs-location">📍 诺丁城</span>
+      <span class="game-time" id="gs-time">⏳ 未知时间</span>
+    </div>
+    <div class="game-narrative" id="gs-narrative"></div>
+    <div class="choices-area" id="gs-choices"></div>
+    <div class="status-bar" id="gs-status"></div>
+    <div class="action-bar" id="gs-actions"></div>
+  </div>
+
+  <!-- Load Screen -->
+  <div id="load-screen" class="screen creation-screen">
+    <div class="creation-title">读 取 存 档</div>
+    <div id="load-content"></div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script>
+// ============================================================
+// 斗罗大陆人生模拟器 - Game Engine
+// ============================================================
+
+// ========== UTILITY ==========
+const $ = (sel) => document.querySelector(sel);
+const $$ = (sel) => document.querySelectorAll(sel);
+const rng = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+
+function toast(msg) {
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity 0.5s'; }, 1500);
+  setTimeout(() => el.remove(), 2100);
+}
+
+// ========== DATA ==========
+const LOCATIONS = {
+  nuoding:    { name:'诺丁城',     desc:'边境小城，平静安逸。诺丁初级魂师学院坐落于此，铁匠铺的锤声从早响到晚。', type:'city',    travel:{ suotuo:1, xingdou:2, tiandou:3 } },
+  suotuo:     { name:'索托城',     desc:'巴拉克王国的商业重镇。大斗魂场的灯火从不熄灭，猫鹰酒店的招牌在风里晃。', type:'city',    travel:{ nuoding:1, xingdou:1, tiandou:2 } },
+  xingdou:    { name:'星斗大森林', desc:'大陆最著名的魂兽栖息地。古木参天，越往深处走，空气里的魂力威压就越沉。', type:'wild',    travel:{ nuoding:2, suotuo:1 } },
+  tiandou:    { name:'天斗城',     desc:'天斗帝国首都，街道宽阔得能并排走四辆马车。天斗皇家学院的金顶在阳光下能晃瞎眼。', type:'city',    travel:{ nuoding:3, suotuo:2, qibao:1 } },
+  wuhun:      { name:'武魂城',     desc:'武魂殿总部所在，整座城安静得不像话。教皇殿的白石巨柱直插天际。', type:'city',    travel:{ tiandou:2, xingdou:3 } },
+  qibao:      { name:'七宝琉璃宗', desc:'上三宗之一，山门隐在云雾里。琉璃塔的微光在夜间如灯塔。', type:'sect',     travel:{ tiandou:1, suotuo:2 } },
+  luori:      { name:'落日森林',   desc:'另一处猎魂区，比星斗大森林安静，但瘴气更重。有人说深处藏着一处宝地。', type:'wild',    travel:{ tiandou:1, xingdou:2 } },
+  haishen:    { name:'海神岛',     desc:'远离大陆的海上孤岛，海风咸涩。传说海神的试炼场就在这里。', type:'special',  travel:{}, locked:true, unlockLevel:60 },
+  shalu:      { name:'杀戮之都',   desc:'地下世界，不见天日。空气中弥漫着铁锈味——那是血的味道。', type:'special',  travel:{}, locked:true, unlockLevel:40 },
+};
+
+const NPC_PROFILES = {
+  tangsan:    { name:'唐三',     title:'史莱克七怪之一',  location:'随意',   desc:'蓝发少年，话不多，手很稳。对暗器有一种近乎偏执的精确。' },
+  xiaowu:     { name:'小舞',     title:'史莱克七怪之一',  location:'随意',   desc:'粉色长裙的少女，笑起来眼睛弯成月牙。走路像踩在弹簧上。' },
+  daimubai:   { name:'戴沐白',  title:'史莱克七怪老大',  location:'随意',   desc:'金发异瞳，身形高大。说话带着星罗帝国那边的口音，有点慵懒。' },
+  zhuzhuqing: { name:'朱竹清',  title:'史莱克七怪之一',  location:'随意',   desc:'黑发如瀑，寡言少语。她的目光像猫一样安静但锐利。' },
+  aosika:     { name:'奥斯卡',  title:'史莱克七怪之一',  location:'随意',   desc:'褐色头发的少年，笑起来有点欠。锅里永远在煮着什么东西。' },
+  ningrongrong:{ name:'宁荣荣', title:'七宝琉璃宗大小姐', location:'随意',  desc:'举手投足间自然流露的贵气，但不惹人厌。说话声音很轻，却总能让人想听。' },
+  flande:     { name:'弗兰德',  title:'史莱克学院院长',  location:'索托城', desc:'精明的中年人，眼镜片后面的眼睛永远在算计什么。但他的算计从不坑自己人。' },
+  zhaowuji:   { name:'赵无极',  title:'史莱克学院教师',  location:'索托城', desc:'拳头比脑袋大，嗓门比拳头大。说话像打雷，但教学生时意外地有耐心。' },
+  yuxiaogang: { name:'玉小刚',  title:'魂师界理论大师',  location:'随意',   desc:'瘦削的中年人，眼神疲惫但专注。他说的话不多，但每句都像准备了很久。' },
+  bibidong:   { name:'比比东',  title:'武魂殿教皇',      location:'武魂城', desc:'白衣女子，面容年轻得不像是掌管大陆最强势力的人。她的笑让人捉摸不透。' },
+  qianrenxue: { name:'千仞雪',  title:'武魂殿圣女',      location:'武魂城', desc:'金发金眸，宛如天使降临。但她的眼里偶尔闪过一些不属于天使的东西。' },
+  huliena:    { name:'胡列娜',  title:'武魂殿黄金一代',  location:'武魂城', desc:'妖媚入骨，但你在她眼里看不到一丝轻浮。她的魅惑之下藏着利刃。' },
+};
+
+const SOUL_BEASTS = [
+  // { name, years, type, element, difficulty, location }
+  { name:'百年幽冥狼', years:350, type:'兽武魂·暗', element:'暗', difficulty:3, location:'星斗大森林', desc:'毛色深黑，双眼在夜间泛绿光。独行猎手，擅长潜行突袭。' },
+  { name:'四百年曼陀罗蛇', years:420, type:'兽武魂·毒', element:'毒', difficulty:5, location:'星斗大森林', desc:'翠绿色的蛇身，头呈三角。速度极快，毒液能麻痹魂师。' },
+  { name:'百年赤炎虎', years:380, type:'兽武魂·火', element:'火', difficulty:4, location:'星斗大森林', desc:'皮毛如火，奔跑时身后拖着一串火星。脾气暴躁。' },
+  { name:'三百年冰晶蟒', years:310, type:'兽武魂·冰', element:'冰', difficulty:3, location:'星斗大森林', desc:'鳞片泛着冰蓝色的冷光，经过的地方会结一层薄霜。' },
+  { name:'六百年铁甲犀', years:620, type:'兽武魂·土', element:'土', difficulty:6, location:'星斗大森林', desc:'皮糙肉厚，冲撞力惊人。但转身慢，有经验的魂师会绕到它侧面。' },
+  { name:'七百年风隼', years:710, type:'兽武魂·风', element:'风', difficulty:5, location:'星斗大森林', desc:'翼展近两米，俯冲速度快得看不清。羽毛根根如铁片。' },
+  { name:'五百年鬼藤', years:520, type:'植物武魂·暗', element:'暗', difficulty:4, location:'落日森林', desc:'会主动缠上靠近的生物，藤蔓上的倒刺能吸取魂力。' },
+  { name:'千年地穴蛛', years:1400, type:'兽武魂·毒', element:'毒', difficulty:8, location:'星斗大森林', desc:'在地面下织网，猎物踩上去的瞬间就会被拖入地底。第三魂环的优秀选择。' },
+  { name:'一千五百年雷鹰', years:1500, type:'兽武魂·雷', element:'雷', difficulty:7, location:'星斗大森林', desc:'盘旋在高空，俯冲时带起一串雷光。对敏攻系魂师是极好的魂环。' },
+  { name:'八百年金刚猿', years:820, type:'兽武魂·力', element:'土', difficulty:6, location:'星斗大森林', desc:'臂力惊人，一拳能砸断合抱粗的树。但智商不算高。' },
+  { name:'两千年荆棘妖花', years:1950, type:'植物武魂·毒', element:'毒', difficulty:7, location:'落日森林', desc:'花心是一张布满细齿的嘴。花粉有毒，靠近时需屏息。' },
+  { name:'三千年玄水龟', years:3200, type:'兽武魂·水', element:'水', difficulty:7, location:'星斗大森林', desc:'壳硬得离谱，普通攻击几乎伤不到它。但龟壳边缘有一处软甲。' },
+  { name:'五千年裂地熊', years:4800, type:'兽武魂·力', element:'土', difficulty:9, location:'星斗大森林', desc:'站起来足有四米高。一掌拍下，地面能裂开两米长的口子。' },
+];
+
+const RANDOM_EVENTS = [
+  { id:'meet_master', title:'偶遇高人', desc:'你看到一个穿着普通但气质不凡的人正在路边观察什么。', types:['city','wild'], effect: '可能获得指点或隐藏任务' },
+  { id:'beast_rampage', title:'魂兽暴动', desc:'远处传来一声低沉的兽吼，地面在微微震动。有什么东西正在靠近——而且很大。', types:['wild'], effect: '遭遇高阶魂兽，可选择战斗或快速撤离' },
+  { id:'treasure_found', title:'意外发现', desc:'你在不起眼的角落发现了一个被藤蔓半掩的洞口，里面隐约透出微弱的光。', types:['wild'], effect: '探索洞穴，可能发现宝物或遇到危险' },
+  { id:'fight_witness', title:'路遇争斗', desc:'前方传来兵刃碰撞声和魂力波动——两个魂师正在交手，而且似乎不是切磋。', types:['city','wild'], effect: '选择介入、旁观或离开，可能影响势力声望' },
+  { id:'mystery_letter', title:'神秘委托', desc:'一个披着斗篷的人从你身边经过时，一张折好的纸条滑进了你的口袋。你打开一看，上面只写了一个地址和一行字："报酬丰厚，勿带旁人。"', types:['city'], effect: '接受或忽略委托' },
+  { id:'meditation_epiphany', title:'魂技顿悟', desc:'你正在日常修炼时，脑中突然闪过一个念头——关于你的武魂，你想到了一种新的运用方式。这个想法让你心跳加速。', types:['any'], effect: '领悟魂技新用法，获得少量魂力增长' },
+  { id:'merchant_deal', title:'商人叫卖', desc:'街边一个行脚商人正在铺开他的货物，嘴里吆喝着"刚从北边弄来的好东西"——你注意到他摊上确实有一些不常见的药草和矿石。', types:['city'], effect: '可购买稀有物品' },
+];
+
+// ========== GAME STATE ==========
+class GameState {
+  constructor() {
+    this.reset();
+  }
+
+  reset() {
+    // Player identity
+    this.player = {
+      name: '', gender: '', age: 6,
+      birthplace: '', background: '', family: '', familyDetail: '',
+      appearance: '', personality: '', ambition: 5,
+      obsession: ''
+    };
+
+    // Cultivation
+    this.cultivation = {
+      soulPower: 0,        // 0 = not awakened
+      innatePower: 0,      // 先天魂力
+      talentTier: '',      // 凡人档/普通魂师档/天才档/怪物档
+      soulRings: [],       // [{year, beast, skillName, skillDesc, element}]
+      spiritBones: [],     // [{part, beast, ability}]
+      wuhun: '',           // 武魂名称
+      wuhunType: '',       // 兽武魂/器武魂/植物武魂/食物系/辅助系/变异武魂
+      wuhunElement: '',    // 属性
+      direction: '',       // 强攻系/敏攻系/控制系/辅助系/防御系/食物系
+    };
+
+    // Economy
+    this.economy = { gold: 0, silver: 0, copper: 0 };
+
+    // Inventory
+    this.inventory = [];
+
+    // Relationships: { npcKey: { affinity: number, status: string, met: bool } }
+    this.relationships = {};
+
+    // Faction reputation
+    this.factions = {
+      '史莱克学院': 0, '武魂殿': 0, '七宝琉璃宗': 0,
+      '蓝电霸王龙家族': 0, '昊天宗': 0, '天斗皇室': 0, '星罗皇室': 0
+    };
+
+    // Time
+    this.time = { year: 2639, month: 3, day: 15, season: '春' };
+    // 斗罗历2639年 = 唐三6岁入诺丁学院那年
+
+    // Location
+    this.currentLocation = 'nuoding';
+
+    // Game flags
+    this.flags = {
+      storyEvents: [],    // completed story events
+      achievements: [],   // unlocked achievements
+      retries: 3,         // time rewind charges
+      cpLock: null,       // locked CP for shipper mode
+    };
+
+    // Narrative history
+    this.narrative = [];
+
+    // Combat state (transient)
+    this.combat = null;
+
+    // Game mode
+    this.gameMode = 'free'; // free / yiyang / chongsheng / fuchou / kecp
+
+    // Creation step
+    this.creationStep = 0;
+  }
+
+  get soulPowerLevel() {
+    if (this.cultivation.soulPower === 0) return '未觉醒';
+    return this.cultivation.soulPower + '级';
+  }
+
+  get soulPowerRank() {
+    const sp = this.cultivation.soulPower;
+    if (sp === 0) return '未觉醒';
+    if (sp <= 10) return '魂士';
+    if (sp <= 20) return '魂师';
+    if (sp <= 30) return '大魂师';
+    if (sp <= 40) return '魂尊';
+    if (sp <= 50) return '魂宗';
+    if (sp <= 60) return '魂王';
+    if (sp <= 70) return '魂帝';
+    if (sp <= 80) return '魂圣';
+    if (sp <= 90) return '魂斗罗';
+    if (sp <= 99) return '封号斗罗';
+    return '神级';
+  }
+
+  get needsSoulRing() {
+    const sp = this.cultivation.soulPower;
+    if (sp === 0) return false;
+    const ringsNeeded = Math.floor(sp / 10);
+    return this.cultivation.soulRings.length < ringsNeeded;
+  }
+
+  get maxSoulRingYears() {
+    const idx = this.cultivation.soulRings.length; // next ring index
+    const caps = [423, 764, 1760, 5000, 12000, 20000, 50000, 80000, 100000];
+    return caps[idx] || 100000;
+  }
+
+  get locationData() {
+    return LOCATIONS[this.currentLocation] || LOCATIONS['nuoding'];
+  }
+
+  get seasonName() {
+    const m = this.time.month;
+    if (m >= 3 && m <= 5) return '春';
+    if (m >= 6 && m <= 8) return '夏';
+    if (m >= 9 && m <= 11) return '秋';
+    return '冬';
+  }
+
+  // NPCs present at current location
+  get presentNPCs() {
+    const loc = this.currentLocation;
+    const result = [];
+    for (const [key, npc] of Object.entries(NPC_PROFILES)) {
+      if (npc.location === '随意' || npc.location === LOCATIONS[loc]?.name) {
+        if (this.relationships[key]?.met) result.push(key);
+      }
+    }
+    // Some NPCs are always at specific locations
+    if (loc === 'suotuo' && this.time.year >= 2642) {
+      if (!result.includes('flande')) result.push('flande');
+      if (!result.includes('zhaowuji')) result.push('zhaowuji');
+    }
+    if (loc === 'wuhun') {
+      if (!result.includes('bibidong')) result.push('bibidong');
+    }
+    return result;
+  }
+}
+
+// ========== GAME CONTROLLER ==========
+const Game = {
+  state: new GameState(),
+
+  // ===== SCREEN MANAGEMENT =====
+  showScreen(id) {
+    $$('.screen').forEach(s => s.classList.remove('active'));
+    const screen = $(`#${id}`);
+    if (screen) screen.classList.add('active');
+  },
+
+  // ===== START =====
+  startNew() {
+    this.state.reset();
+    this.state.creationStep = 1;
+    this.showScreen('creation-screen');
+    this.renderCreationStep1();
+  },
+
+  // ===== CHARACTER CREATION =====
+  renderCreationStep1() {
+    $('#creation-title').textContent = '第一轮 · 你是谁';
+    $('#creation-content').innerHTML = `
+      <div class="creation-prompt">
+        <p>一个孩子在某处出生。产婆的手掌、母亲的喘息、窗外某个季节的风——这些是你来到这个世界时最先接触到的东西。</p>
+        <p style="margin-top:8px;">现在，告诉这个世界你的名字。</p>
+      </div>
+
+      <div class="creation-input" style="flex-direction:column;gap:12px;margin-top:12px;">
+        <div>
+          <label style="color:var(--text2);font-size:12px;">全名</label>
+          <input type="text" id="c-name" placeholder="例如：林枫、南宫月、洛辰..." style="width:100%;">
+        </div>
+        <div>
+          <label style="color:var(--text2);font-size:12px;">性别</label>
+          <select id="c-gender" style="width:100%;">
+            <option value="男">男</option>
+            <option value="女">女</option>
+          </select>
+        </div>
+        <div>
+          <label style="color:var(--text2);font-size:12px;">出生地</label>
+          <select id="c-birthplace" style="width:100%;">
+            <option value="诺丁城">诺丁城——边境小城，平静偏僻</option>
+            <option value="索托城">索托城——商业重镇，大斗魂场的灯火不熄</option>
+            <option value="武魂城">武魂城——武魂殿总部的阴影之下</option>
+            <option value="天斗城">天斗城——天斗帝国首都，繁华而危险</option>
+            <option value="自由村落">某个自由村落——地图上没标的小地方</option>
+            <option value="宗门辖地">某宗门家族辖地——被山门庇护，也被山门束缚</option>
+          </select>
+        </div>
+        <div>
+          <label style="color:var(--text2);font-size:12px;">出身背景</label>
+          <select id="c-background" style="width:100%;">
+            <option value="平民">平民——家里没人当过魂师</option>
+            <option value="小家族子弟">小家族子弟——祖上出过魂师，但早已没落</option>
+            <option value="宗门子弟">宗门子弟——出生在宗门体系内，衣食无忧</option>
+            <option value="武魂殿相关">武魂殿相关——父母在武魂殿任职</option>
+            <option value="皇室旁支">皇室旁支——天斗或星罗皇室的远亲</option>
+            <option value="孤儿">孤儿——没有来处，只有去处</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="btn" onclick="Game.creationNext1()" style="margin-top:16px;align-self:center;">确 认 并 继 续</button>
+    `;
+  },
+
+  creationNext1() {
+    const p = this.state.player;
+    p.name = $('#c-name').value.trim() || '无名';
+    p.gender = $('#c-gender').value;
+    p.birthplace = $('#c-birthplace').value;
+    p.background = $('#c-background').value;
+
+    if (!p.name || p.name === '无名') {
+      toast('请输入你的名字');
+      return;
+    }
+
+    this.state.creationStep = 2;
+    this.renderCreationStep2();
+    $('#creation-content').scrollTop = 0;
+  },
+
+  renderCreationStep2() {
+    const p = this.state.player;
+    $('#creation-title').textContent = '第二轮 · 你的来处与初始设定';
+    $('#creation-content').innerHTML = `
+      <div class="creation-prompt">
+        <p><strong style="color:var(--gold2);">${p.name}</strong>，${p.gender}，生于<strong>${p.birthplace}</strong>，出身<strong>${p.background}</strong>。</p>
+        <p style="margin-top:6px;">名字有了，来处有了。但这只是户口簿上的信息。真正定义一个人的，是那些不再被提起的事。</p>
+      </div>
+
+      <div class="creation-input" style="flex-direction:column;gap:12px;margin-top:12px;">
+        <div>
+          <label style="color:var(--text2);font-size:12px;">家庭状况</label>
+          <select id="c-family" style="width:100%;">
+            <option value="温暖和睦">温暖和睦——晚饭桌上永远有笑声</option>
+            <option value="严厉">严厉——家里人很少夸你，但该教的都教了</option>
+            <option value="孤儿">孤儿——没有来处，只有去处</option>
+            <option value="单亲">单亲——父亲或母亲独自把你拉扯大</option>
+            <option value="家族没落">家族没落——老宅很大，但大部分房间都锁着</option>
+            <option value="家族势力庞大">家族势力庞大——出门报姓氏就有人替你让路</option>
+          </select>
+        </div>
+        <div>
+          <label style="color:var(--text2);font-size:12px;">家族与魂师界的关系</label>
+          <select id="c-familyDetail" style="width:100%;">
+            <option value="祖上曾有封号斗罗，如今已没落">祖上曾有封号斗罗，如今已没落</option>
+            <option value="父母是普通魂师，安稳度日">父母是普通魂师，安稳度日</option>
+            <option value="武魂殿成员后裔">武魂殿成员后裔——家里有人曾为武魂殿效力</option>
+            <option value="与魂师界无关">与魂师界无关——家里三代没出过魂师</option>
+            <option value="隐世高人之后">隐世高人之后——但长辈从不提当年的事</option>
+          </select>
+        </div>
+        <div>
+          <label style="color:var(--text2);font-size:12px;">你是否有什么执念或秘密？（可选）</label>
+          <input type="text" id="c-obsession" placeholder="例如：为家族复仇、寻找失散的亲人、武魂变异隐藏真实实力..." style="width:100%;">
+        </div>
+      </div>
+
+      <button class="btn" onclick="Game.creationNext2()" style="margin-top:16px;align-self:center;">确 认 并 继 续</button>
+    `;
+  },
+
+  creationNext2() {
+    const p = this.state.player;
+    p.family = $('#c-family').value;
+    p.familyDetail = $('#c-familyDetail').value;
+    p.obsession = $('#c-obsession').value.trim() || '无';
+
+    this.state.creationStep = 3;
+    this.renderCreationStep3();
+    $('#creation-content').scrollTop = 0;
+  },
+
+  renderCreationStep3() {
+    const p = this.state.player;
+    $('#creation-title').textContent = '第三轮 · 你的特质';
+    $('#creation-content').innerHTML = `
+      <div class="creation-prompt">
+        <p>你的档案越来越厚了。现在说说你长什么样、是个什么样的人——这些在魂师界不重要，但在人和人之间，是最重要的东西。</p>
+      </div>
+
+      <div class="creation-input" style="flex-direction:column;gap:12px;margin-top:12px;">
+        <div>
+          <label style="color:var(--text2);font-size:12px;">外貌特征（2-4个关键词）</label>
+          <input type="text" id="c-appearance" placeholder="例如：黑发黑瞳、身形修长、眼神锐利" style="width:100%;">
+        </div>
+        <div>
+          <label style="color:var(--text2);font-size:12px;">性格基调（3个词）</label>
+          <input type="text" id="c-personality" placeholder="例如：沉稳、执着、外冷内热" style="width:100%;">
+        </div>
+        <div>
+          <label style="color:var(--text2);font-size:12px;">对"变强"的渴望程度（0-10）</label>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <input type="range" id="c-ambition" min="0" max="10" value="5" style="flex:1;">
+            <span id="c-ambition-val" style="color:var(--gold);min-width:24px;">5</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text2);">
+            <span>0 · 随波逐流</span><span>5 · 想变强</span><span>10 · 不惜一切代价</span>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn" onclick="Game.creationNext3()" style="margin-top:16px;align-self:center;">确 认 并 继 续</button>
+
+      <script>
+        document.getElementById('c-ambition').addEventListener('input', function() {
+          document.getElementById('c-ambition-val').textContent = this.value;
+        });
+      </script>
+    `;
+    // Re-run the slider listener since innerHTML replaces it
+    setTimeout(() => {
+      const slider = $('#c-ambition');
+      if (slider) slider.addEventListener('input', function() {
+        $('#c-ambition-val').textContent = this.value;
+      });
+    }, 50);
+  },
+
+  creationNext3() {
+    const p = this.state.player;
+    p.appearance = $('#c-appearance').value.trim() || '普通外貌';
+    p.personality = $('#c-personality').value.trim() || '沉稳';
+    p.ambition = parseInt($('#c-ambition').value);
+
+    this.state.creationStep = 4;
+    this.renderCreationStep4();
+    $('#creation-content').scrollTop = 0;
+  },
+
+  renderCreationStep4() {
+    const p = this.state.player;
+    $('#creation-title').textContent = '第四轮 · 武魂与天赋';
+    $('#creation-content').innerHTML = `
+      <div class="creation-prompt">
+        <p>武魂觉醒。六岁那年你站在觉醒石前，手心贴上冰冷的石面——然后光芒亮起来了。那道光决定了你接下来几十年能走多远。</p>
+        <p style="margin-top:8px;">先选择你的天赋档位，再确定细节。</p>
+      </div>
+
+      <div style="margin-top:12px;">
+        <label style="color:var(--text2);font-size:12px;">天赋档位选择</label>
+        <div class="creation-options" id="talent-options" style="margin-top:8px;">
+          <div class="creation-option" onclick="Game.selectTalent('凡人档', 1, 3, '普通锄头/镰刀级器武魂，或普通野兽武魂')">
+            <strong>凡人档</strong> 先天魂力1-3级 | 开局吃瘪，逆袭感最强
+          </div>
+          <div class="creation-option" onclick="Game.selectTalent('普通魂师档', 4, 6, '蓝银草品质上下，略有特性但不出彩')">
+            <strong>普通魂师档</strong> 先天魂力4-6级 | 正常修炼，需勤奋+际遇
+          </div>
+          <div class="creation-option" onclick="Game.selectTalent('天才档', 7, 9, '顶级兽武魂/器武魂（如邪眸白虎、七宝琉璃塔级别）')">
+            <strong>天才档</strong> 先天魂力7-9级 | 顺风顺水，容易被注意
+          </div>
+          <div class="creation-option" onclick="Game.selectTalent('怪物档', 9, 10, '变异顶级武魂/双生武魂/极致属性武魂')">
+            <strong>怪物档（慎选）</strong> 先天魂力9-10级 | 开局即核心，上限高
+          </div>
+        </div>
+        <div id="talent-selected" style="margin-top:8px;color:var(--gold);font-size:13px;"></div>
+      </div>
+
+      <div class="creation-input" style="flex-direction:column;gap:12px;margin-top:16px;">
+        <div>
+          <label style="color:var(--text2);font-size:12px;">武魂名称</label>
+          <input type="text" id="c-wuhun" placeholder="你想拥有什么武魂？例如：霜月刀、玄铁盾、影猫..." style="width:100%;">
+        </div>
+        <div>
+          <label style="color:var(--text2);font-size:12px;">武魂类型</label>
+          <select id="c-wuhunType" style="width:100%;">
+            <option value="兽武魂">兽武魂——以动物为原型，强化肉身</option>
+            <option value="器武魂">器武魂——武器或器物形态，强化攻击</option>
+            <option value="植物武魂">植物武魂——以植物为原型，变化多端</option>
+            <option value="食物系">食物系——制造具有特殊效果的食物</option>
+            <option value="辅助系">辅助系——以增益效果为核心</option>
+            <option value="变异武魂">变异武魂——不寻常的武魂，危险但可能很强大</option>
+          </select>
+        </div>
+        <div>
+          <label style="color:var(--text2);font-size:12px;">武魂属性</label>
+          <select id="c-wuhunElement" style="width:100%;">
+            <option value="火">火——炽热、焚烧</option>
+            <option value="冰">冰——冻结、迟缓</option>
+            <option value="雷">雷——迅猛、麻痹</option>
+            <option value="风">风——速度、切割</option>
+            <option value="土">土——厚重、防御</option>
+            <option value="暗">暗——隐匿、腐蚀</option>
+            <option value="光">光——净化、审判</option>
+            <option value="水">水——柔韧、连绵</option>
+            <option value="力">力——纯粹的力量增幅</option>
+            <option value="毒">毒——侵蚀、削弱</option>
+          </select>
+        </div>
+        <div>
+          <label style="color:var(--text2);font-size:12px;">初始发展方向</label>
+          <select id="c-direction" style="width:100%;">
+            <option value="强攻系">强攻系——正面迎战，以力破敌</option>
+            <option value="敏攻系">敏攻系——速度制胜，先发制人</option>
+            <option value="控制系">控制系——限制对手，掌控节奏</option>
+            <option value="辅助系">辅助系——增益队友，扭转战局</option>
+            <option value="防御系">防御系——稳如磐石，不动如山</option>
+            <option value="食物系">食物系——以食物辅助战斗</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="btn" onclick="Game.creationNext4()" style="margin-top:16px;align-self:center;">确 认 并 继 续</button>
+    `;
+  },
+
+  selectTalent(tier, min, max, desc) {
+    this._selectedTalent = { tier, min, max, desc };
+    const innate = rng(min, max);
+    this._talentInnate = innate;
+    $('#talent-selected').innerHTML = `已选：<strong>${tier}</strong> · 先天魂力 ${innate}级 · ${desc}`;
+    // Highlight selected
+    $$('#talent-options .creation-option').forEach(el => el.style.borderColor = 'var(--border)');
+    event.target.closest('.creation-option').style.borderColor = 'var(--gold)';
+  },
+
+  creationNext4() {
+    if (!this._selectedTalent) {
+      toast('请先选择天赋档位');
+      return;
+    }
+    const p = this.state.player;
+    const c = this.state.cultivation;
+    c.talentTier = this._selectedTalent.tier;
+    c.innatePower = this._talentInnate;
+    c.soulPower = c.innatePower;
+    c.wuhun = $('#c-wuhun').value.trim() || '未命名武魂';
+    c.wuhunType = $('#c-wuhunType').value;
+    c.wuhunElement = $('#c-wuhunElement').value;
+    c.direction = $('#c-direction').value;
+
+    this.state.creationStep = 5;
+    this.renderCreationStep5();
+    $('#creation-content').scrollTop = 0;
+  },
+
+  renderCreationStep5() {
+    const p = this.state.player;
+    $('#creation-title').textContent = '第五轮 · 初始道具与财富';
+
+    let gold = 5;
+    if (p.background === '小家族子弟') gold = rng(100, 300);
+    else if (p.background === '宗门子弟') gold = rng(500, 800);
+    else if (p.background === '武魂殿相关') gold = rng(300, 500);
+    else if (p.background === '皇室旁支') gold = rng(500, 1000);
+    else gold = rng(5, 15);
+
+    this.state.economy.gold = gold;
+
+    $('#creation-content').innerHTML = `
+      <div class="creation-prompt">
+        <p>武魂觉醒了，你正式踏上了魂师之路——或者说，即将踏上。但在出发之前，看看口袋里有什么。</p>
+      </div>
+
+      <div style="margin-top:12px;background:var(--card);border:1px solid var(--border);padding:14px;border-radius:2px;">
+        <p style="color:var(--gold2);">💰 初始财富：<strong>${gold} 金魂币</strong></p>
+        <p style="font-size:12px;color:var(--text2);margin-top:4px;">（根据你的出身背景 <strong>${p.background}</strong> 自动生成）</p>
+      </div>
+
+      <div class="creation-input" style="flex-direction:column;gap:12px;margin-top:12px;">
+        <div>
+          <label style="color:var(--text2);font-size:12px;">特殊物品（可选，限1-2件合理物品）</label>
+          <input type="text" id="c-items" placeholder="例如：祖传魂骨碎片、一封推荐信、神秘地图..." style="width:100%;">
+          <p style="font-size:11px;color:var(--text2);margin-top:4px;">留空则无特殊物品。物品不可过于逆天（如开局十万年魂骨）。</p>
+        </div>
+        <div>
+          <label style="color:var(--text2);font-size:12px;">起始年龄（6-15岁）</label>
+          <select id="c-age" style="width:100%;">
+            ${Array.from({length:10}, (_,i) => i+6).map(a => `<option value="${a}" ${a===6?'selected':''}>${a}岁</option>`).join('')}
+          </select>
+        </div>
+      </div>
+
+      <button class="btn" onclick="Game.creationFinish()" style="margin-top:16px;align-self:center;">创 建 角 色</button>
+    `;
+  },
+
+  creationFinish() {
+    const p = this.state.player;
+    p.age = parseInt($('#c-age').value) || 6;
+    const items = $('#c-items').value.trim();
+    if (items) this.state.inventory.push({ name: items, type: '特殊物品', desc: '角色创建时携带的特殊物品' });
+
+    // Set initial time based on age (唐三6岁入诺丁学院 = 斗罗历2639年)
+    this.state.time.year = 2639 + (p.age - 6);
+
+    // Set starting location
+    const birthplaceToLocation = {
+      '诺丁城': 'nuoding', '索托城': 'suotuo', '武魂城': 'wuhun',
+      '天斗城': 'tiandou', '自由村落': 'nuoding', '宗门辖地': 'qibao'
+    };
+    this.state.currentLocation = birthplaceToLocation[p.birthplace] || 'nuoding';
+
+    // Show character card for confirmation
+    this.showCharacterCard();
+  },
+
+  showCharacterCard() {
+    const p = this.state.player;
+    const c = this.state.cultivation;
+    $('#creation-title').textContent = '角 色 档 案 卡';
+    $('#creation-content').innerHTML = `
+      <div class="confirm-card">
+        <h3>⚜️ ${p.name}</h3>
+        <table>
+          <tr><td>性别</td><td>${p.gender}</td></tr>
+          <tr><td>年龄</td><td>${p.age}岁</td></tr>
+          <tr><td>出生地</td><td>${p.birthplace}</td></tr>
+          <tr><td>出身</td><td>${p.background}</td></tr>
+          <tr><td>家庭</td><td>${p.family} · ${p.familyDetail}</td></tr>
+          <tr><td>外貌</td><td>${p.appearance}</td></tr>
+          <tr><td>性格</td><td>${p.personality}</td></tr>
+          <tr><td>变强渴望</td><td>${p.ambition}/10</td></tr>
+          <tr><td>执念/秘密</td><td>${p.obsession || '无'}</td></tr>
+          <tr style="border-top:1px solid var(--border);"><td>天赋档位</td><td><strong style="color:var(--gold);">${c.talentTier}</strong></td></tr>
+          <tr><td>先天魂力</td><td><strong style="color:var(--gold);">${c.innatePower}级</strong></td></tr>
+          <tr><td>当前魂力</td><td>${c.soulPower}级 (${this.state.soulPowerRank})</td></tr>
+          <tr><td>武魂</td><td>${c.wuhun} · ${c.wuhunType} · ${c.wuhunElement}属性</td></tr>
+          <tr><td>发展方向</td><td>${c.direction}</td></tr>
+          <tr style="border-top:1px solid var(--border);"><td>财富</td><td>${this.state.economy.gold} 金魂币</td></tr>
+          <tr><td>物品</td><td>${this.state.inventory.length > 0 ? this.state.inventory.map(i=>i.name).join('、') : '无'}</td></tr>
+        </table>
+      </div>
+
+      <p style="text-align:center;margin-top:16px;font-size:14px;color:var(--text);">确认以上信息，开始你的斗罗大陆之旅？</p>
+
+      <div class="btn-row" style="margin-top:8px;">
+        <button class="btn" onclick="Game.startGame()">⚡ 开始游戏</button>
+        <button class="btn" onclick="Game.state.creationStep=1;Game.renderCreationStep1();$('#creation-content').scrollTop=0;">↩ 重新创建</button>
+      </div>
+    `;
+    $('#creation-content').scrollTop = 0;
+  },
+
+  // ===== START GAME =====
+  startGame() {
+    this.showScreen('game-screen');
+    // Initialize relationships for NPCs that make sense
+    const rels = this.state.relationships;
+    if (Object.keys(rels).length === 0) {
+      for (const key of Object.keys(NPC_PROFILES)) {
+        rels[key] = { affinity: 0, status: '未结识', met: false };
+      }
+    }
+    // Render initial scene
+    this.renderLocationEntry();
+    this.renderStatus();
+    this.renderActions();
+    this.addNarrative('system', `⚜️ 角色创建完成。${this.state.player.name}，欢迎来到斗罗大陆。`);
+    toast('游戏开始 ✦');
+  },
+
+  // ===== NARRATIVE =====
+  addNarrative(type, text) {
+    const ns = $('#gs-narrative');
+    const block = document.createElement('div');
+    block.className = 'narrative-block';
+    let cls = 'narration';
+    if (type === 'system') cls = 'system-msg';
+    if (type === 'combat') cls = 'combat-msg';
+    if (type === 'reward') cls = 'system-msg';
+    block.innerHTML = `<span class="${cls}">${text}</span>`;
+    ns.appendChild(block);
+    ns.scrollTop = ns.scrollHeight;
+    this.state.narrative.push({ type, text, time: {...this.state.time} });
+  },
+
+  // ===== RENDER LOCATION ENTRY =====
+  renderLocationEntry() {
+    const loc = this.state.locationData;
+    const t = this.state.time;
+    $('#gs-location').textContent = `📍 ${loc.name}`;
+    this.state.time.season = this.state.seasonName;
+    $('#gs-time').textContent = `⏳ 斗罗历${t.year}年 ${t.month}月${t.day}日 · ${this.state.seasonName}季`;
+
+    const timeDesc = t.month <= 3 ? '初春的寒意还没散尽' :
+                     t.month <= 5 ? '春意正浓，风里带着花香' :
+                     t.month <= 8 ? '夏日的热浪让人不想动弹' :
+                     t.month <= 10 ? '秋风卷着落叶扫过街道' : '冬天的冷风吹得人脸疼';
+
+    this.addNarrative('narration', `${loc.desc} ${timeDesc}。`);
+  },
+
+  // ===== RENDER CHOICES =====
+  renderChoices(choices) {
+    const area = $('#gs-choices');
+    area.innerHTML = '<div class="choices-title">— 选择行动 —</div>';
+    const labels = ['A', 'B', 'C', 'D'];
+    choices.forEach((c, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.innerHTML = `<span class="choice-label">【${labels[i]}】</span>${c.text}`;
+      btn.onclick = () => {
+        area.innerHTML = '';
+        c.action();
+      };
+      area.appendChild(btn);
+    });
+  },
+
+  // ===== MAIN ACTION MENU =====
+  renderActions() {
+    const choices = [
+      {
+        text: '探索当前区域——四处走走，看看有什么发现',
+        action: () => this.doExplore()
+      },
+      {
+        text: '修炼魂力——找个安静的地方冥想修炼',
+        action: () => this.doCultivate()
+      },
+      {
+        text: '前往其他区域——踏上旅途，去往新的地方',
+        action: () => this.doTravel()
+      },
+      {
+        text: '你有其他想做的事，自己决定',
+        action: () => this.doCustomAction()
+      }
+    ];
+
+    // Add soul ring hunting if needed
+    if (this.state.needsSoulRing) {
+      choices.unshift({
+        text: `🔴 猎杀魂兽获取魂环——你已满${this.state.cultivation.soulPower}级，需要获取第${this.state.cultivation.soulRings.length + 1}魂环`,
+        action: () => this.doHuntSoulRing()
+      });
+    }
+
+    // Add NPC interaction if NPCs present
+    const present = this.state.presentNPCs;
+    if (present.length > 0) {
+      choices.splice(2, 0, {
+        text: `与附近的人交谈——${present.map(k => NPC_PROFILES[k].name).join('、')}在附近`,
+        action: () => this.doInteract()
+      });
+    }
+
+    this.renderChoices(choices);
+  },
+
+  // ===== STATUS DISPLAY =====
+  renderStatus() {
+    const p = this.state.player;
+    const c = this.state.cultivation;
+    const e = this.state.economy;
+    const rings = c.soulRings.map((r, i) => {
+      let colorClass = 'white';
+      if (r.year > 100000) colorClass = 'red';
+      else if (r.year > 20000) colorClass = 'black';
+      else if (r.year > 5000) colorClass = 'purple';
+      else if (r.year > 764) colorClass = 'yellow';
+      return `<span class="soul-ring ${colorClass}"></span>第${i+1}环·${r.year}年·${r.beast}`;
+    }).join(' &nbsp;');
+
+    const rels = this.state.relationships;
+    const metNPCs = Object.entries(rels).filter(([_,v]) => v.met);
+    const relStr = metNPCs.length > 0
+      ? metNPCs.slice(0, 6).map(([k,v]) => `${NPC_PROFILES[k].name}(${v.affinity>0?'+':''}${v.affinity})`).join(' ')
+      : '尚未结识任何重要人物';
+
+    $('#gs-status').innerHTML = `
+      <div class="stat-section">
+        <div class="stat-title">✦ 角色状态</div>
+        <div class="status-row">
+          <span class="status-item">姓名：<span>${p.name}</span></span>
+          <span class="status-item">性别：<span>${p.gender}</span></span>
+          <span class="status-item">年龄：<span>${p.age}岁</span></span>
+        </div>
+        <div class="status-row" style="margin-top:4px;">
+          <span class="status-item">魂力：<span style="color:var(--gold);">${c.soulPower}级 · ${this.state.soulPowerRank}</span></span>
+          <span class="status-item">先天魂力：<span>${c.innatePower}级</span></span>
+          <span class="status-item">天赋：<span>${c.talentTier}</span></span>
+        </div>
+        <div class="status-row" style="margin-top:4px;">
+          <span class="status-item">武魂：<span>${c.wuhun} · ${c.wuhunType} · ${c.wuhunElement}属性</span></span>
+          <span class="status-item">方向：<span>${c.direction}</span></span>
+        </div>
+        ${rings ? `<div style="margin-top:6px;"><span class="status-item">魂环：${rings}</span></div>` : '<div style="margin-top:6px;"><span class="status-item">魂环：暂无</span></div>'}
+        <div style="margin-top:6px;"><span class="status-item">魂技：${c.soulRings.map(r => `${r.skillName}(${r.skillDesc})`).join(' / ') || '暂无魂技'}</span></div>
+        ${c.spiritBones.length > 0 ? `<div style="margin-top:4px;"><span class="status-item">魂骨：${c.spiritBones.map(b=>b.part+'·'+b.beast).join(' / ')}</span></div>` : ''}
+      </div>
+      <div class="stat-section">
+        <div class="stat-title">✦ 财富与物品</div>
+        <span class="status-item">财富：<span>${e.gold}金 ${e.silver}银 ${e.copper}铜</span></span>
+        <span class="status-item" style="margin-left:12px;">物品：<span>${this.state.inventory.length > 0 ? this.state.inventory.map(i=>i.name).join('、') : '无'}</span></span>
+      </div>
+      <div class="stat-section">
+        <div class="stat-title">✦ 好感度</div>
+        <span class="status-item">${relStr}</span>
+      </div>
+      <div class="stat-section">
+        <div class="stat-title">✦ 势力声望</div>
+        <span class="status-item">${Object.entries(this.state.factions).map(([k,v])=>`${k}[${v}]`).join(' ')}</span>
+      </div>
+    `;
+    // Also update action bar
+    $('#gs-actions').innerHTML = `
+      <button class="btn small" onclick="Game.saveGame(0)">💾 快速存档</button>
+      <button class="btn small" onclick="Game.showLoadScreen()">📂 读档</button>
+      <button class="btn small" onclick="Game.showStatusDetail()">📋 详细状态</button>
+      <button class="btn small" onclick="Game.advanceTime(7)">⏩ 快进一周</button>
+    `;
+  },
+
+  // ===== GAME ACTIONS =====
+
+  doExplore() {
+    const loc = this.state.locationData;
+    this.addNarrative('narration', `你在${loc.name}四处转了转。`);
+    this.advanceTime(1);
+
+    // Random event chance
+    if (Math.random() < 0.4) {
+      const validEvents = RANDOM_EVENTS.filter(e => e.types.includes(loc.type) || e.types.includes('any'));
+      const event = pick(validEvents);
+      this.triggerRandomEvent(event);
+    } else {
+      const observations = [
+        `街道上人来人往，几个孩子在路边玩耍，手里拿着木棍假装是武魂在对战。`,
+        `路边茶摊的老板正跟人聊天，说最近有几个外地魂师路过，出手很阔绰。`,
+        `一只野猫蹲在墙头盯着你看了好一会儿，然后甩甩尾巴走了。`,
+        `远处传来魂师修炼时特有的魂力波动——有人在附近练习魂技。`,
+        `市场里热闹依旧，卖魂兽材料的猎户正在和买家讨价还价。`,
+      ];
+      this.addNarrative('narration', pick(observations));
+      this.presentMainChoices();
+    }
+  },
+
+  triggerRandomEvent(event) {
+    this.addNarrative('system', `📌 随机事件：${event.title}`);
+    this.addNarrative('narration', event.desc);
+
+    if (event.id === 'merchant_deal') {
+      this.renderChoices([
+        { text: '上前看看货物——也许会买到有用的东西', action: () => { this.addNarrative('narration', '你翻看了商人的货物，买了一些药草和矿石。'); this.addItem('药草包', '物品', '行脚商人处购入的药草，修炼时可使用'); this.state.economy.gold = Math.max(0, this.state.economy.gold - rng(5, 20)); this.presentMainChoices(); } },
+        { text: '随便看看但不买——身上的钱还是省着点花', action: () => { this.addNarrative('narration', '你随意翻了翻就离开了，商人也没有强留。'); this.presentMainChoices(); } },
+        { text: '你有别的想法', action: () => this.doCustomAction() },
+      ]);
+    } else if (event.id === 'fight_witness') {
+      this.renderChoices([
+        { text: '上前介入——看看能不能帮上一方（可能卷入势力冲突）', action: () => { this.addNarrative('narration', '你走上前去，两名争斗的魂师同时看向你。其中一人冷哼一声："小子，这没你的事。"'); this.state.factions['武魂殿'] += rng(-3, 3); this.presentMainChoices(); } },
+        { text: '袖手旁观——这不是你的战斗', action: () => { this.addNarrative('narration', '你退到一边。战斗很快结束了，胜者扬长而去，输家捂着伤口踉跄离开。'); this.presentMainChoices(); } },
+        { text: '你有别的想法', action: () => this.doCustomAction() },
+      ]);
+    } else if (event.id === 'meditation_epiphany') {
+      const gain = rng(1, 2);
+      this.state.cultivation.soulPower = Math.min(100, this.state.cultivation.soulPower + gain);
+      this.addNarrative('reward', `✨ 顿悟！你对武魂的理解更进了一步。魂力 +${gain}（当前${this.state.cultivation.soulPower}级）`);
+      this.presentMainChoices();
+    } else if (event.id === 'beast_rampage') {
+      this.renderChoices([
+        { text: '迎战——猎杀这头魂兽（进入战斗）', action: () => { const beast = pick(SOUL_BEASTS.filter(b => b.years <= 1000)); this.startCombat(beast); } },
+        { text: '快速撤离——犯不着拿命去赌', action: () => { this.addNarrative('narration', '你迅速向反方向撤离。那震动声渐渐远了，最终消失。'); this.presentMainChoices(); } },
+        { text: '你有别的想法', action: () => this.doCustomAction() },
+      ]);
+    } else {
+      this.addNarrative('narration', '你在这次偶遇中没有特别的收获，但至少多了一些见识。');
+      this.presentMainChoices();
+    }
+  },
+
+  doCultivate() {
+    const c = this.state.cultivation;
+    if (this.state.needsSoulRing) {
+      this.addNarrative('system', `⚠️ 你已经达到${c.soulPower}级，需要获取第${c.soulRings.length + 1}魂环才能继续突破。`);
+      this.renderChoices([
+        { text: '去猎杀魂兽获取魂环', action: () => this.doHuntSoulRing() },
+        { text: '暂时不急着获取魂环，做点别的', action: () => this.presentMainChoices() },
+      ]);
+      return;
+    }
+
+    // Cultivation progress depends on talent and ambition
+    const baseGain = c.talentTier === '怪物档' ? 3 : c.talentTier === '天才档' ? 2 : c.talentTier === '普通魂师档' ? 1.5 : 1;
+    const ambitionBonus = this.state.player.ambition / 10;
+    const totalGain = Math.max(1, Math.floor(baseGain * (1 + ambitionBonus)));
+    const oldLevel = c.soulPower;
+    c.soulPower = Math.min(99, c.soulPower + totalGain);
+    const gained = c.soulPower - oldLevel;
+
+    this.advanceTime(rng(1, 3));
+    const meditationDescs = [
+      '你盘膝坐下，运转魂力在经脉中流转。',
+      '你找了一处安静的地方开始冥想，魂力在体内缓缓涌动。',
+      '你闭上眼睛，感受周围空气中微弱的魂力波动，将它们一丝丝引入体内。',
+    ];
+    this.addNarrative('narration', pick(meditationDescs) + ` 这一次修炼让你的魂力增长了。`);
+    this.addNarrative('reward', `💪 魂力 +${gained}（${oldLevel}级 → ${c.soulPower}级 · ${this.state.soulPowerRank}）`);
+
+    if (this.state.needsSoulRing) {
+      this.addNarrative('system', `⚠️ 你已经达到${c.soulPower}级的瓶颈！必须获取第${c.soulRings.length + 1}魂环才能继续提升。`);
+    }
+
+    this.presentMainChoices();
+  },
+
+  doTravel() {
+    const loc = this.state.locationData;
+    const destinations = Object.entries(loc.travel || {})
+      .filter(([key, days]) => {
+        const dest = LOCATIONS[key];
+        if (!dest) return false;
+        if (dest.locked) {
+          return this.state.cultivation.soulPower >= (dest.unlockLevel || 999);
+        }
+        return true;
+      });
+
+    if (destinations.length === 0) {
+      this.addNarrative('narration', '从这里似乎没有明显的路通往其他地方。也许你该先探索一下周边。');
+      this.presentMainChoices();
+      return;
+    }
+
+    this.addNarrative('narration', `你站在${loc.name}的边界，盘算着下一站去哪里。`);
+    const choices = destinations.map(([key, days]) => ({
+      text: `前往【${LOCATIONS[key].name}】——路程约${days}天 ${LOCATIONS[key].locked ? '🔒需魂力'+LOCATIONS[key].unlockLevel+'级' : ''}`,
+      action: () => {
+        this.state.currentLocation = key;
+        this.advanceTime(days);
+        this.addNarrative('narration', `经过${days}天的旅程，你到达了${LOCATIONS[key].name}。`);
+        this.renderLocationEntry();
+        this.renderStatus();
+        this.renderActions();
+      }
+    }));
+    choices.push({ text: '算了，暂时不走了', action: () => this.presentMainChoices() });
+    this.renderChoices(choices);
+  },
+
+  doInteract() {
+    const present = this.state.presentNPCs;
+    if (present.length === 0) {
+      this.addNarrative('narration', '附近没有你认识的人。也许你该去人多的地方走走。');
+      this.presentMainChoices();
+      return;
+    }
+
+    const choices = present.map(key => {
+      const npc = NPC_PROFILES[key];
+      const rel = this.state.relationships[key] || { affinity: 0, met: false };
+      return {
+        text: `与【${npc.name}】交谈——${npc.title} ${rel.met ? `(好感度:${rel.affinity>0?'+':''}${rel.affinity})` : '(尚未结识)'}`,
+        action: () => this.talkToNPC(key)
+      };
+    });
+    choices.push({ text: '算了，不打扰任何人', action: () => this.presentMainChoices() });
+    this.renderChoices(choices);
+  },
+
+  talkToNPC(key) {
+    const npc = NPC_PROFILES[key];
+    const rel = this.state.relationships[key] || { affinity: 0, met: false, status: '未结识' };
+
+    if (!rel.met) {
+      rel.met = true;
+      rel.status = '初识';
+      this.state.relationships[key] = rel;
+      this.addNarrative('narration', `你第一次正式注意到了${npc.name}——${npc.desc}`);
+      this.addNarrative('system', `📖 结识新人物：${npc.name}（${npc.title}）`);
+    }
+
+    this.addNarrative('narration', `${npc.name}注意到了你，投来一个眼神。你从那个眼神里读出了什么——也许是好奇，也许是审视，也许只是碰巧看到你。`);
+
+    const choices = [
+      {
+        text: `主动打招呼——"${npc.name.includes('比')||npc.name.includes('千')||npc.name.includes('胡') ? '见过大人' : '你好'}"`,
+        action: () => {
+          const affChange = rng(1, 3);
+          rel.affinity += affChange;
+          this.state.relationships[key] = rel;
+          this.addNarrative('narration', `${npc.name}微微点头，算是回应。这个简短的交流让你们之间多了几分熟悉。`);
+          this.addNarrative('reward', `❤️ ${npc.name} 好感度 +${affChange}（当前：${rel.affinity}）`);
+          this.presentMainChoices();
+        }
+      },
+      {
+        text: `保持距离，点头示意就好——有些关系不需要急于推进`,
+        action: () => {
+          const affChange = rng(0, 1);
+          rel.affinity += affChange;
+          this.state.relationships[key] = rel;
+          this.addNarrative('narration', '你们交换了一个简单的点头。有时候，一个点头就足够了。');
+          if (affChange > 0) this.addNarrative('reward', `❤️ ${npc.name} 好感度 +${affChange}（当前：${rel.affinity}）`);
+          this.presentMainChoices();
+        }
+      },
+      {
+        text: `你有更特别的方式与他/她互动`,
+        action: () => this.doCustomAction()
+      },
+      {
+        text: '假装没注意到，离开这里',
+        action: () => this.presentMainChoices()
+      }
+    ];
+    this.renderChoices(choices);
+  },
+
+  doHuntSoulRing() {
+    const c = this.state.cultivation;
+    const loc = this.state.locationData;
+    if (loc.type !== 'wild') {
+      this.addNarrative('narration', `在${loc.name}的街道上可找不到魂兽。你需要前往星斗大森林或落日森林这样的猎魂区。`);
+      this.renderChoices([
+        { text: '前往星斗大森林', action: () => { this.state.currentLocation = 'xingdou'; this.advanceTime(2); this.addNarrative('narration', '你踏入了星斗大森林的外围，参天古木遮天蔽日。空气里弥漫着泥土和树叶的味道，以及——魂兽的气息。'); this.presentHuntingChoices(); } },
+        { text: '前往落日森林', action: () => { this.state.currentLocation = 'luori'; this.advanceTime(1); this.addNarrative('narration', '落日森林的雾气比星斗大森林淡一些，但树木更加扭曲。这里的光线总是昏黄的，像永恒的黄昏。'); this.presentHuntingChoices(); } },
+        { text: '算了，先准备充分再说', action: () => this.presentMainChoices() },
+      ]);
+      return;
+    }
+    this.presentHuntingChoices();
+  },
+
+  presentHuntingChoices() {
+    const maxYears = this.state.maxSoulRingYears;
+    const availableBeasts = SOUL_BEASTS.filter(b => b.years <= maxYears);
+    const ringNum = this.state.cultivation.soulRings.length + 1;
+
+    this.addNarrative('narration', `你需要获取第${ringNum}魂环。以你当前的等级，魂环年限上限为 <strong>${maxYears}年</strong>。你开始在周围搜寻合适的魂兽。`);
+
+    const choices = availableBeasts.slice(0, 4).map(beast => ({
+      text: `猎杀【${beast.name}】(${beast.years}年·${beast.type}·${beast.element})——难度：${'⭐'.repeat(beast.difficulty)} ${beast.desc}`,
+      action: () => this.startCombat(beast, true)
+    }));
+    choices.push({ text: '继续搜索——也许能找到更合适的魂兽', action: () => {
+      this.addNarrative('narration', '你继续在周围搜寻。可惜这一带没有更多合适的魂兽了。');
+      this.presentMainChoices();
+    }});
+    choices.push({ text: '你有其他想法', action: () => this.doCustomAction() });
+    this.renderChoices(choices);
+  },
+
+  doCustomAction() {
+    this.addNarrative('narration', '你停下来思考下一步该怎么做。这个世界很大，你可以做任何你想做的事。');
+    this.renderChoices([
+      { text: '回到常规行动', action: () => this.presentMainChoices() },
+      { text: '查看角色状态', action: () => { this.showStatusDetail(); } },
+      { text: '保存游戏', action: () => { this.saveGame(0); this.presentMainChoices(); } },
+    ]);
+  },
+
+  presentMainChoices() {
+    this.renderStatus();
+    this.renderActions();
+  },
+
+  // ===== COMBAT SYSTEM =====
+  startCombat(beast, isHunt = false) {
+    this.state.combat = {
+      beast: beast,
+      isHunt: isHunt,
+      playerHP: 100,
+      beastHP: 100,
+      playerSP: 100,
+      turn: 0,
+      playerBuffs: [],
+      beastBuffs: [],
+    };
+    this.addNarrative('combat', `⚔️ 战斗开始！你面对的是——<strong>${beast.name}</strong>（${beast.years}年·${beast.desc}）`);
+    this.renderCombatChoices();
+  },
+
+  renderCombatChoices() {
+    const cb = this.state.combat;
+    const beast = cb.beast;
+
+    this.addNarrative('narration', `你的状态：HP ${cb.playerHP}/100 | SP ${cb.playerSP}/100 | 敌方HP ${cb.beastHP}/100`);
+
+    const elementAdvantage = this.getElementAdvantage(this.state.cultivation.wuhunElement, beast.element);
+
+    const choices = [
+      {
+        text: `全力攻击——使用你的最强攻击手段 ${elementAdvantage ? '(元素' + elementAdvantage + ')' : ''}`,
+        action: () => this.combatRound('attack')
+      },
+      {
+        text: `使用魂技——${this.state.cultivation.soulRings.length > 0 ? this.state.cultivation.soulRings.map(r => r.skillName).join(' / ') : '你还没有魂技，用普通攻击代替'}`,
+        action: () => this.combatRound('skill')
+      },
+      {
+        text: '防御姿态——减少受到的伤害，寻找反击机会',
+        action: () => this.combatRound('defend')
+      },
+      {
+        text: '尝试撤退——保存实力，来日再战（可能失败）',
+        action: () => this.combatRound('flee')
+      },
+    ];
+    this.renderChoices(choices);
+  },
+
+  getElementAdvantage(playerElement, beastElement) {
+    const advantages = {
+      '火': ['冰', '植物', '木'],
+      '冰': ['火', '水'],
+      '雷': ['水', '风'],
+      '风': ['土', '植物'],
+      '土': ['雷', '水'],
+      '暗': ['光'],
+      '光': ['暗'],
+      '水': ['火', '土'],
+      '力': [],
+      '毒': ['植物', '光'],
+    };
+    const disadv = advantages[playerElement] || [];
+    if (disadv.includes(beastElement)) return '克制';
+    const beastAdv = advantages[beastElement] || [];
+    if (beastAdv.includes(playerElement)) return '被克制';
+    return '';
+  },
+
+  combatRound(action) {
+    const cb = this.state.combat;
+    const beast = cb.beast;
+    const c = this.state.cultivation;
+    cb.turn++;
+
+    const powerDiff = c.soulPower / 10 - beast.difficulty;
+    const elementAdv = this.getElementAdvantage(c.wuhunElement, beast.element);
+    const elementMult = elementAdv === '克制' ? 1.5 : elementAdv === '被克制' ? 0.7 : 1.0;
+
+    let playerDmg = 0;
+    let beastDmg = 0;
+    let playerDefMod = 1;
+
+    if (action === 'attack') {
+      playerDmg = Math.floor((15 + powerDiff * 5) * elementMult * (0.8 + Math.random() * 0.4));
+      beastDmg = Math.floor((10 + beast.difficulty * 3) * (0.7 + Math.random() * 0.6));
+      this.addNarrative('combat', `你向${beast.name}发起猛攻！`);
+    } else if (action === 'skill') {
+      if (c.soulRings.length > 0) {
+        const skill = pick(c.soulRings);
+        const spCost = 20;
+        if (cb.playerSP >= spCost) {
+          cb.playerSP -= spCost;
+          playerDmg = Math.floor((25 + powerDiff * 8) * elementMult * (0.9 + Math.random() * 0.3));
+          this.addNarrative('combat', `你释放魂技【${skill.skillName}】——${skill.skillDesc}！魂力消耗${spCost}点。`);
+        } else {
+          this.addNarrative('combat', '魂力不足！你转为普通攻击。');
+          playerDmg = Math.floor((10 + powerDiff * 3) * elementMult * (0.8 + Math.random() * 0.4));
+        }
+      } else {
+        playerDmg = Math.floor((12 + powerDiff * 4) * (0.8 + Math.random() * 0.4));
+      }
+      beastDmg = Math.floor((10 + beast.difficulty * 3) * (0.7 + Math.random() * 0.6));
+    } else if (action === 'defend') {
+      playerDefMod = 0.35;
+      playerDmg = Math.floor((5 + powerDiff * 2) * (0.5 + Math.random() * 0.3));
+      beastDmg = Math.floor((10 + beast.difficulty * 3) * playerDefMod);
+      this.addNarrative('combat', '你摆出防御姿态，严阵以待。');
+    } else if (action === 'flee') {
+      const fleeChance = 0.4 + powerDiff * 0.1;
+      if (Math.random() < fleeChance) {
+        this.addNarrative('narration', '你抓住机会转身就跑，成功脱离了战斗。');
+        this.state.combat = null;
+        this.presentMainChoices();
+        return;
+      } else {
+        this.addNarrative('combat', '撤退失败！敌人趁你转身时发起攻击！');
+        beastDmg = Math.floor((15 + beast.difficulty * 3) * (0.9 + Math.random() * 0.3));
+      }
+    }
+
+    // Apply damage
+    cb.beastHP = Math.max(0, cb.beastHP - playerDmg);
+    cb.playerHP = Math.max(0, cb.playerHP - beastDmg);
+
+    if (playerDmg > 0) this.addNarrative('combat', `你对${beast.name}造成了 <strong>${playerDmg}</strong> 点伤害（剩余HP: ${cb.beastHP}）`);
+    if (beastDmg > 0) this.addNarrative('combat', `${beast.name}反击，对你造成了 <strong>${beastDmg}</strong> 点伤害（你的HP: ${cb.playerHP}）`);
+
+    // Check combat end
+    if (cb.beastHP <= 0) {
+      this.combatVictory();
+      return;
+    }
+    if (cb.playerHP <= 0) {
+      this.combatDefeat();
+      return;
+    }
+
+    // Continue combat
+    this.renderCombatChoices();
+  },
+
+  combatVictory() {
+    const cb = this.state.combat;
+    const beast = cb.beast;
+    this.addNarrative('reward', `🎉 你击败了${beast.name}！`);
+
+    if (cb.isHunt) {
+      // Grant soul ring
+      const skillName = this.generateSkillName(beast);
+      const skillDesc = this.generateSkillDesc(beast);
+      this.state.cultivation.soulRings.push({
+        year: beast.years,
+        beast: beast.name,
+        skillName: skillName,
+        skillDesc: skillDesc,
+        element: beast.element,
+      });
+      this.addNarrative('reward', `✨ 你获得了第${this.state.cultivation.soulRings.length}魂环！`);
+      this.addNarrative('reward', `📖 新魂技：【${skillName}】——${skillDesc}`);
+      this.state.flags.achievements.push('首次猎杀魂兽');
+    }
+
+    // Loot
+    const goldReward = rng(beast.years / 50, beast.years / 20);
+    this.state.economy.gold += goldReward;
+    this.addNarrative('reward', `💰 获得魂兽材料，可卖出 ${goldReward} 金魂币`);
+
+    // Small chance of spirit bone
+    if (Math.random() < 0.03 && beast.years >= 800) {
+      const parts = ['左臂', '右臂', '左腿', '右腿'];
+      const part = pick(parts);
+      this.state.cultivation.spiritBones.push({ part: part, beast: beast.name, ability: `${beast.element}属性增幅` });
+      this.addNarrative('reward', `💀 极其罕见！${beast.name}掉落了一块<strong>${part}魂骨</strong>！`);
+    }
+
+    this.state.combat = null;
+    this.presentMainChoices();
+  },
+
+  combatDefeat() {
+    const cb = this.state.combat;
+    this.addNarrative('combat', `💀 你被${cb.beast.name}击败了...`);
+    // Soul power loss penalty
+    const loss = rng(1, 3);
+    this.state.cultivation.soulPower = Math.max(0, this.state.cultivation.soulPower - loss);
+    this.addNarrative('system', `⚠️ 重伤！魂力倒退 ${loss} 级（当前：${this.state.cultivation.soulPower}级）。你需要休养一段时间。`);
+    this.advanceTime(rng(3, 7));
+    this.state.combat = null;
+    this.presentMainChoices();
+  },
+
+  generateSkillName(beast) {
+    const elementNames = { '火':'焚','冰':'霜','雷':'雷','风':'疾','土':'岩','暗':'暗','光':'圣','水':'潮','力':'破','毒':'蚀' };
+    const typeNames = { '兽武魂·火':'怒焰击','兽武魂·冰':'冰棘刺','兽武魂·毒':'毒牙突','兽武魂·雷':'雷光斩','兽武魂·风':'风刃切','兽武魂·力':'崩山击','兽武魂·水':'漩涡绞','兽武魂·土':'大地裂','兽武魂·暗':'暗影袭','植物武魂·暗':'暗藤缠','植物武魂·毒':'毒花散' };
+    return typeNames[beast.type] || `${elementNames[beast.element] || ''}${beast.name.slice(0,2)}击`;
+  },
+
+  generateSkillDesc(beast) {
+    const c = this.state.cultivation;
+    if (c.direction === '强攻系') return `以${beast.element}属性魂力凝聚于一点，释放强力一击，造成大量伤害`;
+    if (c.direction === '敏攻系') return `借助${beast.name}的敏捷特性，高速移动中发起突袭`;
+    if (c.direction === '控制系') return `以${beast.element}之力限制对手行动，${beast.element === '毒' ? '附加中毒效果' : beast.element === '冰' ? '附加迟缓效果' : '削弱对手战力'}`;
+    if (c.direction === '防御系') return `凝${beast.name}之魂力为盾，大幅提升防御力`;
+    return `${beast.element}属性魂技，${beast.name}之力的具现`;
+  },
+
+  // ===== TIME =====
+  advanceTime(days) {
+    const t = this.state.time;
+    t.day += days;
+    while (t.day > 30) { t.day -= 30; t.month++; }
+    while (t.month > 12) { t.month -= 12; t.year++; }
+    t.season = this.state.seasonName;
+
+    // Age progression (rough)
+    if (t.month === 6 && t.day <= 7) {
+      // Birthday season - check roughly
+      const oldAge = this.state.player.age;
+      const expectedAge = 6 + (t.year - 2639);
+      if (expectedAge > oldAge && t.month >= 6) {
+        this.state.player.age = expectedAge;
+        if (expectedAge > oldAge) {
+          this.addNarrative('system', `🎂 你长大了一岁，现在是${expectedAge}岁了。`);
+        }
+      }
+    }
+
+    // NPC affinity decay
+    if (days >= 30) {
+      for (const [key, rel] of Object.entries(this.state.relationships)) {
+        if (rel.met && rel.affinity > 0) {
+          rel.affinity = Math.max(0, rel.affinity - Math.floor(days / 30));
+        }
+      }
+    }
+
+    $('#gs-time').textContent = `⏳ 斗罗历${t.year}年 ${t.month}月${t.day}日 · ${t.season}季`;
+  },
+
+  // ===== INVENTORY =====
+  addItem(name, type, desc) {
+    this.state.inventory.push({ name, type, desc });
+    this.addNarrative('system', `📦 获得物品：【${name}】`);
+  },
+
+  // ===== SAVE / LOAD =====
+  saveGame(slot) {
+    const saveData = JSON.parse(JSON.stringify(this.state));
+    saveData.combat = null; // Don't save active combat
+    const key = `douluo_save_${slot}`;
+    const meta = {
+      slot,
+      name: this.state.player.name,
+      level: this.state.cultivation.soulPower,
+      location: this.state.locationData.name,
+      time: `斗罗历${this.state.time.year}年${this.state.time.month}月${this.state.time.day}日`,
+      timestamp: Date.now(),
+    };
+    localStorage.setItem(key, JSON.stringify(saveData));
+    localStorage.setItem(`${key}_meta`, JSON.stringify(meta));
+    this.addNarrative('system', `💾 存档成功！（存档槽 ${slot + 1}）`);
+    toast(`存档 ${slot + 1} 已保存 ✦`);
+  },
+
+  loadGame(slot) {
+    const key = `douluo_save_${slot}`;
+    const raw = localStorage.getItem(key);
+    if (!raw) {
+      toast('该存档槽为空');
+      return false;
+    }
+    try {
+      const data = JSON.parse(raw);
+      this.state = Object.assign(new GameState(), data);
+      // Restore methods that aren't serialized
+      Object.setPrototypeOf(this.state, GameState.prototype);
+      this.showScreen('game-screen');
+      $('#gs-narrative').innerHTML = '';
+      this.addNarrative('system', `📂 读取存档成功。欢迎回来，${this.state.player.name}。`);
+      this.renderLocationEntry();
+      this.renderStatus();
+      this.renderActions();
+      toast('读档成功 ✦');
+      return true;
+    } catch (e) {
+      toast('存档损坏，无法读取');
+      return false;
+    }
+  },
+
+  showLoadScreen() {
+    this.showScreen('load-screen');
+    const saveSlots = [];
+    for (let i = 0; i < 5; i++) {
+      const metaRaw = localStorage.getItem(`douluo_save_${i}_meta`);
+      if (metaRaw) {
+        try {
+          const meta = JSON.parse(metaRaw);
+          saveSlots.push(meta);
+        } catch (e) {}
+      } else {
+        saveSlots.push({ slot: i, name: '（空）', level: '-', location: '-', time: '-', timestamp: 0 });
+      }
+    }
+
+    $('#load-content').innerHTML = `
+      <div class="creation-options">
+        ${saveSlots.map(s => `
+          <div class="creation-option" onclick="${s.name !== '（空）' ? `Game.loadGame(${s.slot});Game.showScreen('game-screen');` : ''}" style="${s.name==='（空）'?'opacity:0.5;cursor:default':''}">
+            <strong>存档槽 ${s.slot + 1}：${s.name}</strong>
+            <span class="hint">魂力：${s.level}级 | 地点：${s.location} | 时间：${s.time}</span>
+            ${s.timestamp ? `<span class="hint">保存时间：${new Date(s.timestamp).toLocaleString('zh-CN')}</span>` : ''}
+          </div>
+        `).join('')}
+      </div>
+      <div style="margin-top:16px;display:flex;gap:8px;justify-content:center;">
+        <button class="btn small" onclick="Game.dropSaves()">清空所有存档</button>
+        <button class="btn small" onclick="Game.showScreen('title-screen')">返回标题</button>
+      </div>
+    `;
+  },
+
+  dropSaves() {
+    if (confirm('确定要清空所有存档吗？此操作不可恢复！')) {
+      for (let i = 0; i < 5; i++) {
+        localStorage.removeItem(`douluo_save_${i}`);
+        localStorage.removeItem(`douluo_save_${i}_meta`);
+      }
+      toast('所有存档已清空');
+      this.showLoadScreen();
+    }
+  },
+
+  showStatusDetail() {
+    const p = this.state.player;
+    const c = this.state.cultivation;
+    this.addNarrative('narration', `——— 详细状态 ———
+姓名：${p.name}
+性别：${p.gender} | 年龄：${p.age}岁
+出身：${p.birthplace} · ${p.background}
+家庭：${p.family} · ${p.familyDetail}
+外貌：${p.appearance}
+性格：${p.personality}
+执念：${p.obsession}
+——— 修炼 ———
+天赋：${c.talentTier} | 先天魂力：${c.innatePower}级
+当前魂力：${c.soulPower}级 · ${this.state.soulPowerRank}
+武魂：${c.wuhun} · ${c.wuhunType} · ${c.wuhunElement}
+方向：${c.direction}
+魂环：${c.soulRings.map((r,i)=>`第${i+1}环·${r.year}年·${r.beast}·${r.skillName}`).join(' | ') || '无'}
+魂技：${c.soulRings.map(r=>`${r.skillName}(${r.skillDesc})`).join(' | ') || '无'}
+魂骨：${c.spiritBones.map(b=>`${b.part}·${b.beast}(${b.ability})`).join(' | ') || '无'}
+——— 冒险 ———
+位置：${this.state.locationData.name}
+财富：${this.state.economy.gold}金 ${this.state.economy.silver}银 ${this.state.economy.copper}铜
+物品：${this.state.inventory.map(i=>i.name).join('、') || '无'}
+时空回溯剩余：${this.state.flags.retries}次
+———`);
+    this.presentMainChoices();
+  },
+
+  // ===== RANDOM HELPER =====
+  init() {
+    // Check for existing saves to show continue button
+    let hasSave = false;
+    for (let i = 0; i < 5; i++) {
+      if (localStorage.getItem(`douluo_save_${i}`)) hasSave = true;
+    }
+    if (!hasSave) {
+      $$('#title-screen .btn')[1].style.opacity = '0.4';
+      $$('#title-screen .btn')[1].style.pointerEvents = 'none';
+    }
+  }
+};
+
+// ===== INIT =====
+document.addEventListener('DOMContentLoaded', () => {
+  Game.init();
+});
+
+// Auto-save reminder
+window.addEventListener('beforeunload', () => {
+  // Silent auto-save to slot 4
+  try {
+    Game.saveGame(4);
+  } catch(e) {}
+});
+
+console.log('⚜️ 斗罗大陆人生模拟器 - 已就绪');
+console.log('基于《斗罗大陆》第一部世界观 · 高自由度文字RPG');
+console.log('开源项目 - 欢迎贡献内容与玩法');
+</script>
+
+</body>
+</html>
