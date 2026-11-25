@@ -864,14 +864,8 @@ const Game = {
       </div>
 
       <button class="btn" onclick="Game.creationNext3()" style="margin-top:16px;align-self:center;">确 认 并 继 续</button>
-
-      <script>
-        document.getElementById('c-ambition').addEventListener('input', function() {
-          document.getElementById('c-ambition-val').textContent = this.value;
-        });
-      </script>
     `;
-    // Re-run the slider listener since innerHTML replaces it
+    // Bind slider after innerHTML replace (do not embed script tags in this template)
     setTimeout(() => {
       const slider = $('#c-ambition');
       if (slider) slider.addEventListener('input', function() {
