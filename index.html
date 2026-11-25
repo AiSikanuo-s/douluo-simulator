@@ -1621,11 +1621,19 @@ const Game = {
       }
     }
 
+    // Clamp damage: low soulPower vs high difficulty can make formulas negative,
+    // and subtracting a negative would heal instead of hurt.
+    playerDmg = Math.max(0, playerDmg);
+    beastDmg = Math.max(0, beastDmg);
+
     // Apply damage
     cb.beastHP = Math.max(0, cb.beastHP - playerDmg);
     cb.playerHP = Math.max(0, cb.playerHP - beastDmg);
 
     if (playerDmg > 0) this.addNarrative('combat', `你对${beast.name}造成了 <strong>${playerDmg}</strong> 点伤害（剩余HP: ${cb.beastHP}）`);
+    else if (action === 'attack' || action === 'skill' || action === 'defend') {
+      this.addNarrative('combat', `你的攻击未能对${beast.name}造成有效伤害。`);
+    }
     if (beastDmg > 0) this.addNarrative('combat', `${beast.name}反击，对你造成了 <strong>${beastDmg}</strong> 点伤害（你的HP: ${cb.playerHP}）`);
 
     // Check combat end
